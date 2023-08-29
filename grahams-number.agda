@@ -39,8 +39,8 @@ iterate f a (suc b) = f a (iterate f a b)
 _ : ↑[ 2 ] 2 4 ≡ 65536
 _ = refl
 
--- We don't want g to compute, so define it abstract.
-abstract
+-- We don't always want g to compute, so define it opaque.
+opaque
   g : ℕ → ℕ
   g zero = 4
   g (suc n) = ↑[ g n ] 3 3
@@ -50,7 +50,7 @@ G : ℕ
 G = g 64
 
 module _ where private
-  -- This would not succeed if g was not abstract.
+  -- This would hang forever if g would unfold.
   _ : G ≡ g 64
   _ = refl
 
@@ -60,8 +60,9 @@ g-1 : ℕ → ℕ
 g-1 zero = 4
 g-1 (suc n) = ↑[ g n ] 3 3
 
--- Reenter the abstract block to prove the computation rule of g.
-abstract
+opaque
+  unfolding g
+
   g-computation-rule : (n : ℕ) → g n ≡ g-1 n
   g-computation-rule zero = refl
   g-computation-rule (suc n) = refl
